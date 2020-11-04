@@ -81,8 +81,6 @@ public class CalculaNominas {
 		 * convenientemente el cï¿½digo generando el Javadoc.
 		 */
 
-		
-		
 	}
 
 	
