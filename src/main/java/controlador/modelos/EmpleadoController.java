@@ -3,6 +3,8 @@ package controlador.modelos;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import controlador.database.ConexionDB;
 
@@ -42,52 +44,43 @@ public class EmpleadoController implements IEmpleadoController {
 	}
 
 	@Override
-	public String showAll() {
+	public List<Empleado> showAll() {
 
 		String sNombre = null;
-		String sLetra = null;
+		char cLetra = 0;
 		String sDni = null;
-		String sDni2 = null;
-		String bCategoria = null;
-		String bAnios = null;
+		byte bCategoria = 0;
+		byte bAnyosTrabajados = 0;
+		List<Empleado> lLista = null;
 
-		String sResultado = "No hay Empleados";
+		
 
-		String sql = "SELECT COUNT(*) FROM EMPLEADO;";
+		String sql = "SELECT * FROM EMPLEADO;";
 
-		if (ConexionDB.executeCount(sql) > 0) {
+		try {
+			lLista = new ArrayList<Empleado>();
+			Statement statement = ConexionDB.getConnection().createStatement();
+			ResultSet resultSet = statement.executeQuery(sql);
+			while (resultSet.next()) {
 
-			sResultado = "<table border='1px' style='margin: 0 auto;'><tr style='background-color: aqua;'><th>NOMBRE</th><th>DNI</th><th>SEXO</th><th>CATEGORIA</th><th>ANIOS</th><th>SUELDO (EUROS)</th></tr>";
+				sNombre = resultSet.getString("nombre");
+				sDni=resultSet.getString("dni");
+				String sLetra = resultSet.getString("sexo");
+				cLetra = sLetra.charAt(0);
+				bCategoria = (byte) resultSet.getInt("categoria");
+				bAnyosTrabajados = (byte) resultSet.getInt("anio");
 
-			String sql2 = "SELECT * FROM EMPLEADO;";
+				Empleado oEmpleado = new Empleado(sNombre, sDni, cLetra, bAnyosTrabajados, bCategoria);
+				lLista.add(oEmpleado);
 
-			try {
-				Statement statement = ConexionDB.getConnection().createStatement();
-				ResultSet resultSet = statement.executeQuery(sql2);
-				while (resultSet.next()) {
-
-					sNombre = "<td>" + resultSet.getString("nombre") + "</td>";
-					sLetra = "<td>" + resultSet.getString("sexo") + "</td>";
-					sDni = resultSet.getString("dni");
-					sDni2 = "<td>" + resultSet.getString("dni") + "</td>";
-					bCategoria = "<td>" + resultSet.getByte("categoria") + "</td>";
-					bAnios = "<td>" + resultSet.getByte("anio") + "</td>";
-
-					sResultado += "<tr style='text-align: center;" + "        background-color: pink;'>" + sNombre
-							+ sDni2 + sLetra + bCategoria + bAnios + "<td>" + Float.toString(getSalaryDB(sDni))
-							+ "</td></tr>";
-
-				}
-				sResultado += "</table>";
-
-				resultSet.close();
-				statement.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
 			}
-		}
-		return sResultado;
 
+			resultSet.close();
+			statement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return lLista;
 	}
 
 	@Override
@@ -288,40 +281,40 @@ public class EmpleadoController implements IEmpleadoController {
 					sDni = resultSet.getString("dni");
 
 					sNombre = "<td>" + resultSet.getString("nombre")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					sLetra = "<td>" + resultSet.getString("sexo")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca H o M (SEXO):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					sDni2 = "<td>" + resultSet.getString("dni")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					bCategoria = "<td>" + resultSet.getByte("categoria")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Categoria (1-10):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					bAnios = "<td>" + resultSet.getByte("anio")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca 1-80 (ANIOS):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
@@ -349,75 +342,65 @@ public class EmpleadoController implements IEmpleadoController {
 	}
 
 	public String upDateCampoDNI(Empleado oEmpleadoExistente, Empleado oEmpleadoActualizado) {
-		
+
 		String sDniAnterior = oEmpleadoExistente.getsDni();
 		String sDniUpDate = oEmpleadoActualizado.getsDni();
-		
-		String sql ="UPDATE EMPLEADO SET DNI = '"+sDniUpDate+"' WHERE DNI = '"+sDniAnterior+"';";
+
+		String sql = "UPDATE EMPLEADO SET DNI = '" + sDniUpDate + "' WHERE DNI = '" + sDniAnterior + "';";
 
 		ConexionDB.executeUpdate(sql);
-		
+
 		return showEmployee(oEmpleadoActualizado);
 
-
-		
 	}
 
 	public String upDateCampoNOMBRE(Empleado oEmpleadoExistente, Empleado oEmpleadoActualizado) {
 
 		String sDniAnterior = oEmpleadoExistente.getsDni();
 		String sNombreUpDate = oEmpleadoActualizado.getsNombre();
-		
-		String sql ="UPDATE EMPLEADO SET NOMBRE = '"+sNombreUpDate+"' WHERE DNI = '"+sDniAnterior+"';";
+
+		String sql = "UPDATE EMPLEADO SET NOMBRE = '" + sNombreUpDate + "' WHERE DNI = '" + sDniAnterior + "';";
 
 		ConexionDB.executeUpdate(sql);
-		
+
 		return showEmployee(oEmpleadoExistente);
 
-
-		
 	}
 
 	public String upDateCampoLETRA(Empleado oEmpleadoExistente, Empleado oEmpleadoActualizado) {
 		String sDniAnterior = oEmpleadoExistente.getsDni();
-		char cLetra =oEmpleadoActualizado.getcLetra();
-		
-		String sql ="UPDATE EMPLEADO SET SEXO = '"+cLetra+"' WHERE DNI = '"+sDniAnterior+"';";
+		char cLetra = oEmpleadoActualizado.getcLetra();
+
+		String sql = "UPDATE EMPLEADO SET SEXO = '" + cLetra + "' WHERE DNI = '" + sDniAnterior + "';";
 
 		ConexionDB.executeUpdate(sql);
-		
+
 		return showEmployee(oEmpleadoExistente);
 
-
-		
 	}
 
 	public String upDateCampoCATEGORIA(Empleado oEmpleadoExistente, Empleado oEmpleadoActualizado) {
 		String sDniAnterior = oEmpleadoExistente.getsDni();
-		byte bCategoria =oEmpleadoActualizado.getbCategoria();
-		
-		String sql ="UPDATE EMPLEADO SET CATEGORIA = "+bCategoria+" WHERE DNI = '"+sDniAnterior+"';";
+		byte bCategoria = oEmpleadoActualizado.getbCategoria();
+
+		String sql = "UPDATE EMPLEADO SET CATEGORIA = " + bCategoria + " WHERE DNI = '" + sDniAnterior + "';";
 
 		ConexionDB.executeUpdate(sql);
-		
+
 		return showEmployee(oEmpleadoExistente);
 
-
-		
 	}
 
 	public String upDateCampoANIO(Empleado oEmpleadoExistente, Empleado oEmpleadoActualizado) {
 		String sDniAnterior = oEmpleadoExistente.getsDni();
-		byte bAnio =oEmpleadoActualizado.getbAnyosTrabajados();
-		
-		String sql ="UPDATE EMPLEADO SET ANIO = "+bAnio+" WHERE DNI = '"+sDniAnterior+"';";
+		byte bAnio = oEmpleadoActualizado.getbAnyosTrabajados();
+
+		String sql = "UPDATE EMPLEADO SET ANIO = " + bAnio + " WHERE DNI = '" + sDniAnterior + "';";
 
 		ConexionDB.executeUpdate(sql);
-		
+
 		return showEmployee(oEmpleadoExistente);
 
-
-		
 	}
 
 	public String showAllEmployeeEditNOMBRE(Empleado oEmpleado) {
@@ -448,40 +431,40 @@ public class EmpleadoController implements IEmpleadoController {
 					sDni = resultSet.getString("dni");
 
 					sNombre = "<td>" + resultSet.getString("nombre")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					sLetra = "<td>" + resultSet.getString("sexo")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca H o M (SEXO):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					sDni2 = "<td>" + resultSet.getString("dni")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					bCategoria = "<td>" + resultSet.getByte("categoria")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Categoria (1-10):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					bAnios = "<td>" + resultSet.getByte("anio")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca 1-80 (ANIOS):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
@@ -507,6 +490,7 @@ public class EmpleadoController implements IEmpleadoController {
 		return sResultado;
 
 	}
+
 	public String showAllEmployeeEditSEXO(Empleado oEmpleado) {
 		String sResultado = "Empleado no registrado con ese sexo";
 
@@ -516,11 +500,11 @@ public class EmpleadoController implements IEmpleadoController {
 		String sDni2 = null;
 		String bCategoria = null;
 		String bAnios = null;
-		char cLetra =0;
+		char cLetra = 0;
 
 		cLetra = oEmpleado.getcLetra();
-		
-		String sLetraBuscador = cLetra+"";
+
+		String sLetraBuscador = cLetra + "";
 
 		String sql2 = "SELECT COUNT(*) FROM EMPLEADO WHERE SEXO = '" + sLetraBuscador + "';";
 
@@ -538,40 +522,40 @@ public class EmpleadoController implements IEmpleadoController {
 					sDni = resultSet.getString("dni");
 
 					sNombre = "<td>" + resultSet.getString("nombre")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					sLetra = "<td>" + resultSet.getString("sexo")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca H o M (SEXO):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					sDni2 = "<td>" + resultSet.getString("dni")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					bCategoria = "<td>" + resultSet.getByte("categoria")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Categoria (1-10):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					bAnios = "<td>" + resultSet.getByte("anio")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca 1-80 (ANIOS):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
@@ -597,6 +581,7 @@ public class EmpleadoController implements IEmpleadoController {
 		return sResultado;
 
 	}
+
 	public String showAllEmployeeEditCATEGORIA(Empleado oEmpleado) {
 		String sResultado = "Empleado no registrado con esa categoria";
 
@@ -608,7 +593,6 @@ public class EmpleadoController implements IEmpleadoController {
 		String bAnios = null;
 
 		byte bCategoriaBuscador = oEmpleado.getbCategoria();
-		
 
 		String sql2 = "SELECT COUNT(*) FROM EMPLEADO WHERE CATEGORIA = '" + bCategoriaBuscador + "';";
 
@@ -626,40 +610,40 @@ public class EmpleadoController implements IEmpleadoController {
 					sDni = resultSet.getString("dni");
 
 					sNombre = "<td>" + resultSet.getString("nombre")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					sLetra = "<td>" + resultSet.getString("sexo")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca H o M (SEXO):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					sDni2 = "<td>" + resultSet.getString("dni")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					bCategoria = "<td>" + resultSet.getByte("categoria")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Categoria (1-10):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					bAnios = "<td>" + resultSet.getByte("anio")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca 1-80 (ANIOS):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
@@ -685,6 +669,7 @@ public class EmpleadoController implements IEmpleadoController {
 		return sResultado;
 
 	}
+
 	public String showAllEmployeeEditANIO(Empleado oEmpleado) {
 		String sResultado = "Empleado no registrado con esa experiencia en anios";
 
@@ -696,7 +681,6 @@ public class EmpleadoController implements IEmpleadoController {
 		String bAnios = null;
 
 		byte bAnioBuscador = oEmpleado.getbAnyosTrabajados();
-		
 
 		String sql2 = "SELECT COUNT(*) FROM EMPLEADO WHERE ANIO = '" + bAnioBuscador + "';";
 
@@ -714,40 +698,40 @@ public class EmpleadoController implements IEmpleadoController {
 					sDni = resultSet.getString("dni");
 
 					sNombre = "<td>" + resultSet.getString("nombre")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoNOMBRE&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (NOMBRE):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					sLetra = "<td>" + resultSet.getString("sexo")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoSEXO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca H o M (SEXO):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					sDni2 = "<td>" + resultSet.getString("dni")
-					+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="+sDni+"' method='post'>"
-					+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
-					+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
-					+ "				title='Debe poner 8 numeros y una letra'"
-					+ "				size='3px'/> <input"
-					+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
-					+ "				value='EDIT'/>" + "</form></td>";
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoDNI&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "				type='text' name='menuApp' placeholder='Introduzca (DNI):'"
+							+ "				title='Debe poner 8 numeros y una letra'"
+							+ "				size='3px'/> <input"
+							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
+							+ "				value='EDIT'/>" + "</form></td>";
 					bCategoria = "<td>" + resultSet.getByte("categoria")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoCATEGORIA&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Categoria (1-10):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
 							+ "				style='padding: 0.5em; font-size: 0.9em' type='submit'"
 							+ "				value='EDIT'/>" + "</form></td>";
 					bAnios = "<td>" + resultSet.getByte("anio")
-							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="+sDni+"' method='post'>"
-							+ "			<input style='padding: 0.5m;  font-size: 0.9em'"
+							+ "<form action='ServletController?action=urlConexion&method=Ok&eleccion=UpDateEditEmpleadoANIO&campoEdit="
+							+ sDni + "' method='post'>" + "			<input style='padding: 0.5m;  font-size: 0.9em'"
 							+ "				type='text' name='menuApp' placeholder='Introduzca 1-80 (ANIOS):'"
 							+ "				title='Debe poner 8 numeros y una letra'"
 							+ "				size='3px'/> <input"
@@ -773,4 +757,34 @@ public class EmpleadoController implements IEmpleadoController {
 		return sResultado;
 
 	}
-}
+
+	public List<Empleado> showParameters(String sQuery) {
+		
+		List<Empleado> lLista =null;
+		try {
+			lLista = new ArrayList<Empleado>();
+			Statement statement = ConexionDB.getConnection().createStatement();
+			ResultSet resultSet = statement.executeQuery(sQuery);
+
+			while (resultSet.next()) {
+
+				String sNombre = resultSet.getString("nombre");
+				String sLetra = resultSet.getString("sexo");
+				String sDni = resultSet.getString("dni");
+				byte bCategoria = resultSet.getByte("categoria");
+				byte bAnios = resultSet.getByte("anio");
+
+				char cLetra = sLetra.charAt(0);
+
+				Empleado oEmpleadoBuscador = new Empleado(sNombre, sDni, cLetra, bAnios, bCategoria);
+				lLista.add(oEmpleadoBuscador);
+			}
+			resultSet.close();
+			statement.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return lLista;
+
+}}

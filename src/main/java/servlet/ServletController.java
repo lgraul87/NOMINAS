@@ -1,7 +1,6 @@
 package servlet;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -39,34 +38,13 @@ public class ServletController extends HttpServlet {
 
 
 			System.out.println("Cargando...");
-
-			String action = request.getParameter("action");
-			String method = request.getParameter("method");
-			String sEleccion = request.getParameter("eleccion");
-
-			if (action.equals("urlConexion")) {
-
-				try {
-					if (method.equals("Ok")) {
-						conexionGenerica(request, response, sEleccion);
-					}
-
-				} catch (SQLException e) {
-					e.getStackTrace();
-				}
-
-			}
-		}
-
-		public void conexionGenerica(HttpServletRequest request, HttpServletResponse response, String sEleccion)
-				throws SQLException, ServletException, IOException {
+		
 
 			String sEntrar = request.getParameter("eleccion");
 			String sAccion = request.getParameter("menuApp");
 
 			request.setAttribute("sEntrar", sEntrar);
 			request.setAttribute("sAccion", sAccion);
-
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher("ServletComunicador");
 			requestDispatcher.forward(request, response);
 

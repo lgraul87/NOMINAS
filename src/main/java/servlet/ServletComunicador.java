@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import controlador.database.ConexionDB;
 import modelo.laboral.Empleado;
 import vista.principal.CalculaNominas;
 
@@ -33,8 +35,6 @@ public class ServletComunicador extends HttpServlet {
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
-	
-	
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
@@ -50,28 +50,24 @@ public class ServletComunicador extends HttpServlet {
 
 		String sKeyPagina = (String) request.getAttribute("sAccion");
 
+		String sNext = null;
+
 		switch (sMode) {
 		case "buscaPagina":
 			switch (sKeyPagina) {
 			// ###################### ENTRAR A LA APP ##################
-			case "Entrar a la app": {
-				RequestDispatcher requestDispatcher = request.getRequestDispatcher("menuApp.jsp");
-				requestDispatcher.forward(request, response);
-			}
+			case "Entrar a la app":
+				sNext = "menuApp.jsp";
 				break;
 			// ###################### ENTRAR A LA DEMO #################
 
-			case "Entrar a la demo": {
-				RequestDispatcher requestDispatcher = request.getRequestDispatcher("demo.jsp");
-				requestDispatcher.forward(request, response);
-			}
+			case "Entrar a la demo":
+				sNext = "demo.jsp";
 				break;
 			// ###################### SALIR DE LA APP ##################
 
-			case "Salir": {
-				RequestDispatcher requestDispatcher = request.getRequestDispatcher("salir.jsp");
-				requestDispatcher.forward(request, response);
-			}
+			case "Salir":
+				sNext = "salir.jsp";
 				break;
 			// ###################### ATRAS -> INDEX ###################
 
@@ -98,11 +94,11 @@ public class ServletComunicador extends HttpServlet {
 			// ###################### MODIFICAR EMPLEADO ###############
 
 			case "modificarEmpleado": {
-				String sTabla = CalculaNominas.controlGeneral.getEmpleadoController().showAll();
+				List<Empleado> lLista = CalculaNominas.controlGeneral.getEmpleadoController().showAll();
 
-				if (sTabla.equals("No hay Empleados")) {
+				if (lLista == null) {
 
-					String sCausa = sTabla;
+					String sCausa = "No hay empleados";
 
 					request.setAttribute("causa", sCausa);
 
@@ -110,43 +106,49 @@ public class ServletComunicador extends HttpServlet {
 
 				} else {
 
-					request.setAttribute("tablaEmpleados", sTabla);
+					request.setAttribute("listaEmpleados", lLista);
 
-					RequestDispatcher requestDispatcher = request.getRequestDispatcher("editarEmpleado.jsp");
-
-					requestDispatcher.forward(request, response);
+					sNext = "busquedaEditarEmpleado.jsp";
 
 				}
-
-			}
 				break;
+			}
 			// ############# MOSTRAR EMPLEADOS (TODOS) #################
 
 			case "mostrarEmpleados": {
 
-				String sTabla = CalculaNominas.controlGeneral.getEmpleadoController().showAll();
+				List<Empleado> lLista = CalculaNominas.controlGeneral.getEmpleadoController().showAll();
 
-				if (sTabla.equals("No hay Empleados")) {
+				request.setAttribute("listaEmpleados", lLista);
 
-					String sCausa = sTabla;
+				RequestDispatcher requestDispatcher = request.getRequestDispatcher("tablaEmpleados.jsp");
 
-					request.setAttribute("causa", sCausa);
+				requestDispatcher.forward(request, response);
 
-					enviarError(request, response);
-
-				} else {
-
-					request.setAttribute("tablaEmpleados", sTabla);
-
-					RequestDispatcher requestDispatcher = request.getRequestDispatcher("tablaEmpleados.jsp");
-
-					requestDispatcher.forward(request, response);
-
-				}
 			}
 				break;
+			}break;
+
+			case "upDateEmpleado": {
+
+				String sNombre =  request.getParameter("nombre");
+				String sDni =  request.getParameter("dni");
+				String sSexo =  request.getParameter("sexo");
+				String sCategoria = request.getParameter("categoria");
+				int iCategoria= Integer.parseInt(sCategoria);
+				String sAnio = request.getParameter("anio");
+				int iAnio = Integer.parseInt(sAnio);
+				
+				String sQuery ="UPDATE EMPLEADO SET NOMBRE = '"+sNombre+"', DNI = '"+sDni+"'"
+						+ ", SEXO = '"+sSexo+"', CATEGORIA = "+iCategoria+", ANIO = "+iAnio+" WHERE DNI = '"+sDni+"'";
+				
+				ConexionDB.executeUpdate(sQuery);
+				
+				sNext="menuApp.jsp";
+
 			}
-			break;
+				break;
+			
 
 		case "dniSueldo":
 			switch (sKeyPagina) {
@@ -168,29 +170,78 @@ public class ServletComunicador extends HttpServlet {
 				break;
 			}
 
-		case "editEmpleadoDNI":
-			switch (sKeyPagina) {
-			default:
+		case "editEmpleado":
 
-				int iNumero = sKeyPagina.length();
+			boolean bNombre = false;
+			boolean bDni = false;
+			boolean bSexo = false;
+			boolean bCategoria = false;
+			boolean bAnio = false;
 
-				if (iNumero == 9) {
-					//
-					if (verificarDni(sKeyPagina, request, response).equals("no")) {
-						String sCausa = "Introduciste un DNI erroneo, sin letra o con mas letras de la cuenta";
-						request.setAttribute("causa", sCausa);
-						enviarError(request, response);
-					} else if (verificarDni(sKeyPagina, request, response).equals("ok")) {
-						buscarEmpleadoPorDniEdit(request, response);
-					}
-				} else if (iNumero != 9) {
-					String sCausa = "Introduciste un DNI erroneo, no son 9 caracteres, te lo inventaste";
-					request.setAttribute("causa", sCausa);
-					enviarError(request, response);
+			String sNombre = request.getParameter("nombre");
+			String sDni = request.getParameter("dni");
+			String sSexo = request.getParameter("sexo");
+			String sCategoria = request.getParameter("categoria");
+			String sAnio = request.getParameter("anio");
 
-				}
-				break;
+			String sQuery = "SELECT * FROM EMPLEADO WHERE ";
+
+			if (sNombre != "") {
+				bNombre = true;
+				sQuery += "NOMBRE = '" + sNombre + "'";
 			}
+			if (sDni != "") {
+				bDni = true;
+				if (bNombre) {
+					sQuery += " AND DNI = '" + sDni + "'";
+				} else {
+					sQuery += "DNI = '" + sDni + "'";
+				}
+			}
+			if (sSexo != "") {
+				bSexo = true;
+				if (bNombre || bDni) {
+					sQuery += " AND SEXO = '" + sSexo + "'";
+
+				} else {
+					sQuery += "SEXO = '" + sSexo + "'";
+				}
+
+			}
+			if (sCategoria != "") {
+				bCategoria = true;
+				if (bNombre || bDni | bSexo) {
+					sQuery += " AND CATEGORIA = " + sCategoria + "";
+
+				} else {
+					sQuery += "CATEGORIA = " + sCategoria + "";
+				}
+
+			}
+			if (sAnio != "") {
+				bAnio = true;
+				if (bNombre || bDni | bSexo || bCategoria) {
+					sQuery += " AND ANIO = '" + sAnio + "'";
+
+				} else {
+					sQuery += "ANIO = '" + sAnio + "'";
+				}
+
+			}
+
+			if (!bNombre && !bDni && !bSexo && !bCategoria && !bAnio) {
+				String sCausa = "No existen coincidencias";
+				request.setAttribute("causa", sCausa);
+				enviarError(request, response);
+			} else {
+				List<Empleado> lLista = CalculaNominas.controlGeneral.getEmpleadoController().showParameters(sQuery);
+				request.setAttribute("listaEmpleados", lLista);
+
+				sNext = "resultadoBusquedaEditarEmpleado.jsp";
+
+			}
+
+			break;
 
 		case "editEmpleadoNOMBRE":
 			switch (sKeyPagina) {
@@ -400,9 +451,9 @@ public class ServletComunicador extends HttpServlet {
 
 		}
 
+		RequestDispatcher requestDispatcher = request.getRequestDispatcher(sNext);
+		requestDispatcher.forward(request, response);
 	}
-
-	// ###################### SIGUIENTE CASE ##################
 
 	// ###################### FIN SWITCH SMODE ################################
 	// ---------------------------------------------------------------------------

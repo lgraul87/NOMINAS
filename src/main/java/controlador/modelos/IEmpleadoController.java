@@ -1,12 +1,14 @@
 package controlador.modelos;
 
+import java.util.List;
+
 import modelo.laboral.Empleado;
 
 public interface IEmpleadoController {
 
 	public boolean addEmployee(Empleado oEmpleado1);
 
-	public String showAll();
+	public List<Empleado> showAll();
 
 	public String showEmployee(Empleado oEmpleado);
 

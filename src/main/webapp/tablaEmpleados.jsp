@@ -1,34 +1,69 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+	pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page isELIgnored="false"%>
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Insert title here</title>
-</head>
-<body style="background-color: palegoldenrod;">
-	<br>
-	<br>
-	<br>
-	<div style="text-align: center;">
-		<br>
-		<h1 style="text-align: center; color: white;">EMPLEADOS:</h1>
-		<br>
-		<h3><%=request.getAttribute("tablaEmpleados")%></h3>
-	</div>
-	<form
-		action="ServletController?action=urlConexion&method=Ok&eleccion=buscaPagina"
-		method="post">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
 
-		<!-- Atras ###################################################################################: -->
-		<button onmouseover="this.style.backgroundColor='yellow'"
-			onmouseout="this.style.backgroundColor='#eeeeee'" type="submit"
-			style="border: 0px solid; width: 150px; height: 150px;"
-			name="menuApp" value="atrasMenuApp">
-			<img
-				src="C:\Users\lgrau\eclipse-workspace\demoWebapp.zip_expanded\demoWebapp\src\main\imagenes\atras.png"
-				style="border: 0px solid; width: 150px; height: 150px;" />
-		</button>
-	</form>
+<title>Tabla empleados</title>
+<style type="text/css">
+table {
+	align-content: center;
+	text-align: center;
+	margin: 0 auto;
+	border: 1px;
+	width: 60%;
+}
+
+th {
+	background-color: black;
+	color: white;
+}
+
+td {
+	background-color: #DFCFF5;
+	color: black;
+}
+
+h1{
+text-align: center;
+}
+</style>
+</head>
+<body style="background-color: #D0F2E0;">
+
+<br>
+<h1>Tabla empleados</h1>
+	
+	<br>
+	<br>
+
+	<table>
+		<tbody>
+			<tr>
+				<th>NOMBRE</th>
+				<th>DNI</th>
+				<th>SEXO</th>
+				<th>CATEGORIA</th>
+				<th>ANIOS</th>
+			</tr>
+
+			<c:forEach var="empleado" items="${listaEmpleados}">
+				<tr>
+					<td><c:out value="${empleado.sNombre}" /></td>
+					<td><c:out value="${empleado.sDni}" /></td>
+					<td><c:out value="${empleado.cLetra}" /></td>
+					<td><c:out value="${empleado.bCategoria}" /></td>
+					<td><c:out value="${empleado.bAnyosTrabajados}" /></td>
+				</tr>
+			</c:forEach>
+		</tbody>
+	</table>
+
+
 </body>
 </html>

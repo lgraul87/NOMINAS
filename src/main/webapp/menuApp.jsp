@@ -4,11 +4,12 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+
 <title>Menu gestor de nominas</title>
 <style>
 body {
-	background-image:
-		url("https://lh3.googleusercontent.com/proxy/nIGOEPRIkza2S8wX_Id7sLE3ixtJlbC5kEVorwJ3MqNy2Kykx7App4y9nmfJhJtsvjXkFGuBktU0M308Gt3EycV8M7e4CIF_6qyC2Mmz4Ax4J5KmeQtgTfXYti9XQjUEi5NRGswnHWa16jCYalv4RTrpPAEQ9-PVCEg");
+	background-image:url("./imagenes/background-portada.jpg")
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -24,7 +25,7 @@ button {
 
 </head>
 
-<body style="background: teal;">
+<body>
 	<h1>Gestor de nominas</h1>
 	<h2>Elija opcion:</h2>
 
